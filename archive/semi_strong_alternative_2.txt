@@ -1,0 +1,52 @@
+# import pandas as pd
+# import numpy as np
+# from datetime import datetime
+
+# merged_df.index = pd.to_datetime(merged_df.index)
+
+
+# # Assuming merged_df is already loaded into your environment
+# # Event Table
+# events = [
+#     {"name": "Lehman Collapse", "event_date": "9/15/2008", "start_date": "9/8/2008", "end_date": "9/22/2008"},
+#     {"name": "Russia-Crimea Annexation", "event_date": "3/18/2014", "start_date": "3/11/2014", "end_date": "3/25/2014"},
+#     {"name": "ECB QE Announcement", "event_date": "1/22/2015", "start_date": "1/15/2015", "end_date": "1/29/2015"},
+#     {"name": "Brexit Vote", "event_date": "6/23/2016", "start_date": "6/16/2016", "end_date": "6/30/2016"},
+#     {"name": "COVID-19 Pandemic", "event_date": "3/11/2020", "start_date": "3/4/2020", "end_date": "3/18/2020"},
+#     {"name": "Russia-Ukraine War", "event_date": "2/24/2022", "start_date": "2/17/2022", "end_date": "3/3/2022"},
+# ]
+
+# asset_classes = merged_df.columns[:-1]  # Excluding the sentiment score
+
+
+# results = []
+
+# for event in events:
+#     start = datetime.strptime(event['start_date'], "%m/%d/%Y")
+#     event_day = datetime.strptime(event['event_date'], "%m/%d/%Y")
+#     end = datetime.strptime(event['end_date'], "%m/%d/%Y")
+    
+#     event_results = {
+#         "Event": event['name'],
+#     }
+
+#     for asset in asset_classes:
+#         # Calculate daily returns from start to event day
+#         pre_event_daily_returns = merged_df.loc[start:event_day, asset].dropna()
+        
+#         # Calculate geometric return for the pre-event period
+#         pre_event_geometric_return = (np.prod(1 + pre_event_daily_returns))**(1/len(pre_event_daily_returns)) - 1
+        
+#         # Calculate daily returns from event day to end date
+#         post_event_daily_returns = merged_df.loc[event_day:end, asset].dropna()
+
+#         # Calculate geometric return for the post-event period
+#         post_event_geometric_return = (np.prod(1 + post_event_daily_returns))**(1/len(post_event_daily_returns)) - 1
+        
+#         event_results[f"{asset} Pre-Event Geometric Return"] = pre_event_geometric_return
+#         event_results[f"{asset} Post-Event Geometric Return"] = post_event_geometric_return
+
+#     results.append(event_results)
+
+# return_df = pd.DataFrame(results)
+# return_df.head()

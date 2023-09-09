@@ -1,0 +1,47 @@
+# import xgboost as xgb
+# from sklearn.model_selection import GridSearchCV
+# import time
+
+# # Define the parameter grid for XGBoost
+# param_grid = {
+#     'learning_rate': [0.01, 0.05, 0.1, 0.2, 0.3],
+#     'max_depth': [3, 4, 5, 6, 7],
+#     'min_child_weight': [1, 2, 3, 4],
+#     'gamma': [0, 0.1, 0.2],
+#     'subsample': [0.8, 0.9, 1.0],
+#     'colsample_bytree': [0.8, 0.9, 1.0],
+#     'tree_method': ['gpu_hist']  # Ensure using GPU
+# }
+
+# assets = ['US Large Cap Equities', 'US Small Cap Equities', 'US Investment Grade Bonds',
+#           'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities',
+#           'Emerging Market Equities', 'Emerging Market Debt']
+
+# best_parameters = {}  # Store best parameters for each asset
+
+# for asset in assets:
+#     print(f"Tuning hyperparameters for {asset}...")
+
+#     y_train_asset = X_train[asset]
+
+#     model1 = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+#     grid_search = GridSearchCV(model1, param_grid, cv=5, scoring='accuracy', n_jobs=1, verbose=2)  # n_jobs=1 when using GPU
+
+#     start_time = time.time()
+    
+#     grid_search.fit(X_train, y_train_asset)
+
+#     elapsed_time = time.time() - start_time
+#     print(f"Time taken for {asset}: {elapsed_time:.2f} seconds")
+    
+#     best_parameters[asset] = grid_search.best_params_
+
+# print("\nBest parameters for each asset:")
+# for asset, params in best_parameters.items():
+#     print(f"{asset}:", params)
+
+import matplotlib.pyplot as plt
+
+for asset, model in final_models.items():
+    xgb.plot_importance(model, title=f'Feature Importance for {asset}')
+    plt.show()

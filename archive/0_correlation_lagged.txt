@@ -1,0 +1,19 @@
+# # combined_data.info()
+
+# # Assuming your DataFrame is named 'df'
+# selected_columns = combined_data.iloc[:, [0,7,14,21,28,35,42 ] + list(range(56, 64))]
+
+# corr= selected_columns.corr()
+
+# # Getting the Upper Triangle of the co-relation matrix
+# matrix = np.triu(corr)
+
+# plt.figure(figsize=(20,15))
+
+# # using the upper triangle matrix as mask 
+# sns.heatmap(corr, annot=True, mask=matrix, cmap='coolwarm', vmin=-1, vmax=1)
+# title = f"Correlation Matrix between Current Day and Next Day Returns ({formatted_start_date} to {formatted_end_date})"
+# plt.title(title, fontsize=14)
+# plt.show()
+
+# # print(corr)

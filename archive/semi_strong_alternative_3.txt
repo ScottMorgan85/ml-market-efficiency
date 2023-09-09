@@ -1,0 +1,40 @@
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Setting the style for seaborn plots
+sns.set(style="whitegrid")
+
+# Generating the bar plots
+events_list = [event['name'] for event in events]
+asset_columns = [col for col in return_df.columns if "Pre-Event" in col or "Post-Event" in col]
+
+for asset in asset_classes:
+    plt.figure(figsize=(12, 6))
+    
+    # Extracting data for the asset
+    pre_event_col = f"{asset} Pre-Event Geometric Return"
+    post_event_col = f"{asset} Post-Event Geometric Return"
+    
+    sns.barplot(x='Event', y=pre_event_col, data=return_df, label="Pre-Event", alpha=0.8)
+    sns.barplot(x='Event', y=post_event_col, data=return_df, label="Post-Event", alpha=0.5)
+    
+    plt.title(f'Pre-event vs. Post-event Geometric Returns for {asset}')
+    plt.ylabel('Geometric Return')
+    plt.xticks(rotation=45)
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+    
+# Reshaping the dataframe for heatmap
+heatmap_df = return_df.melt(id_vars=["Event"], 
+                            value_vars=asset_columns, 
+                            var_name="Asset & Period", 
+                            value_name="Geometric Return")
+
+# Creating a pivot table
+pivot_table = heatmap_df.pivot_table(index="Asset & Period", columns="Event", values="Geometric Return")
+
+plt.figure(figsize=(12, 8))
+sns.heatmap(pivot_table, annot=True, cmap="coolwarm", center=0)
+plt.title('Geometric Returns Heatmap')
+plt.show()

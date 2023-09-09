@@ -1,0 +1,141 @@
+# # Hyper-parameter Tuning
+
+# def hyperparameter_tuning(X_train, y_train):
+#     print("Starting hyperparameter tuning...")
+
+#     param_dist = {
+#         'learning_rate': [0.01, 0.05, 0.1, 0.2],
+#         'max_depth': [3, 5, 7],
+#         'min_child_weight': [1, 2, 3],
+#         'gamma': [0, 0.1],
+#         'subsample': [0.8, 1.0],
+#         'colsample_bytree': [0.8, 1.0],
+#         'tree_method': ['gpu_hist']
+#     }
+
+#     best_parameters = {}
+    
+#     asset_columns = y_train.columns
+    
+#     for asset in asset_columns:
+#         print(f"Tuning hyperparameters for {asset}...")
+#         model = xgb.XGBClassifier(eval_metric='logloss')
+#         random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=10, scoring='accuracy', n_jobs=1, cv=2, verbose=1, random_state=42)
+
+#         start_time = time.time()
+#         random_search.fit(X_train, y_train[asset])
+#         elapsed_time = time.time() - start_time
+
+#         print(f"Time taken for {asset}: {elapsed_time:.2f} seconds")
+#         best_parameters[asset] = random_search.best_params_
+        
+#     print("Hyperparameter tuning completed!")
+#     return best_parameters
+
+# best_parameters = hyperparameter_tuning(X_train, y_train)
+
+# # Train Final Models Using Best Parameters:
+
+# def train_final_models_with_best_parameters(X_train, y_train, best_parameters):
+#     print("Training final models with best parameters...")
+
+#     final_models = {}
+    
+#     for asset, params in best_parameters.items():       
+#         print(f"Training final model for {asset} with best parameters...")
+#         model = xgb.XGBClassifier(**params, eval_metric='logloss')
+#         model.fit(X_train, y_train[asset])
+#         final_models[asset] = model
+
+#         # Save the model to disk under /data/ folder
+#         model_filename = f"./models/{asset.replace(' ', '_')}_final_model.pkl"  # Replacing spaces with underscores for filenames
+#         joblib.dump(model, model_filename)
+#         print(f"Saved {asset}'s final model to disk at {model_filename}.")       
+
+#     print("Final models training completed!")
+#     return final_models
+
+# final_models = train_final_models_with_best_parameters(X_train, y_train, best_parameters)
+
+# def evaluate_final_models(final_models, X_test, y_test):
+#     evaluation_metrics = {
+#         'Asset': [],
+#         'Accuracy': [],
+#         'F1 Score': [],
+#         'ROC AUC': []
+#     }
+
+#     for asset, model in final_models.items():
+#         y_pred = model.predict(X_test)
+#         y_pred_proba = model.predict_proba(X_test)[:, 1]
+
+#         evaluation_metrics['Asset'].append(asset)
+#         evaluation_metrics['Accuracy'].append(accuracy_score(y_test[asset], y_pred))
+#         evaluation_metrics['F1 Score'].append(f1_score(y_test[asset], y_pred))
+#         evaluation_metrics['ROC AUC'].append(roc_auc_score(y_test[asset], y_pred_proba))
+
+#     return evaluation_metrics
+
+# evaluation_metrics = evaluate_final_models(final_models, X_test, y_test)
+
+# def format_evaluation_metrics(evaluation_metrics):
+#     formatted_metrics = {}
+#     for i, asset in enumerate(evaluation_metrics['Asset']):
+#         formatted_metrics[asset] = {
+#             'Accuracy': evaluation_metrics['Accuracy'][i],
+#             'F1 Score': evaluation_metrics['F1 Score'][i],
+#             'ROC AUC': evaluation_metrics['ROC AUC'][i]
+#         }
+#     return formatted_metrics
+
+# formatted_evaluation_metrics = format_evaluation_metrics(evaluation_metrics)
+
+# def create_comparison_df(initial_results, formatted_evaluation_metrics):
+#     metrics = list(initial_results.values())[0].keys()
+#     columns = pd.MultiIndex.from_product([metrics, ['Pre-Tuning', 'Post-Tuning']])
+#     comparison_df = pd.DataFrame(columns=columns, index=initial_results.keys())
+
+#     for asset in initial_results:
+#         for metric in initial_results[asset]:
+#             comparison_df.loc[asset, (metric, 'Pre-Tuning')] = initial_results[asset].get(metric, None)
+#             comparison_df.loc[asset, (metric, 'Post-Tuning')] = formatted_evaluation_metrics.get(asset, {}).get(metric, None)
+    
+#     return comparison_df
+
+# comparison_df = create_comparison_df(initial_results, formatted_evaluation_metrics)
+
+# def style_comparison_df(comparison_df):
+#     def highlight_columns(s):
+#         return ['background-color: #d9d9d9' if 'Post-Tuning' in col else '' for col in s.index]
+
+#     styled = comparison_df.style.apply(highlight_columns, axis=0)
+
+#     for metric in list(initial_results.values())[0].keys():
+#         styled.set_properties(subset=[(metric, 'Post-Tuning')], **{'border-right': '2px solid black'})
+
+#     return styled
+
+# styled_comparison_df = style_comparison_df(comparison_df)
+# styled_comparison_df
+
+# def interpret_with_shap(models, X):
+#     """
+#     Use SHAP to interpret the given models on dataset X.
+#     """
+#     for asset, model in models.items():
+#         print(f"Generating SHAP values for {asset}...")
+
+#         # Create the explainer for the model
+#         explainer = shap.Explainer(model)
+
+#         # Compute SHAP values for the training set
+#         shap_values = explainer(X)
+
+#         # Plot
+#         shap.plots.beeswarm(shap_values)
+#         print(f"SHAP analysis completed for {asset}!")
+
+#     print("All SHAP analyses completed!")
+
+# # Now call the function with your models and training data
+# interpret_with_shap(final_models, X_train)

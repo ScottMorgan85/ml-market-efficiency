@@ -1,0 +1,128 @@
+semi-strong_results
+
+
+NO HYPER PARAMETER TUNING
+US Large Cap Equities:
+  Accuracy: 0.4686
+  F1 Score: 0.5079
+  ROC AUC: 0.5082
+
+US Small Cap Equities:
+  Accuracy: 0.5086
+  F1 Score: 0.5114
+  ROC AUC: 0.5312
+
+US Investment Grade Bonds:
+  Accuracy: 0.5543
+  F1 Score: 0.6250
+  ROC AUC: 0.5669
+
+US High Yield Bonds:
+  Accuracy: 0.6800
+  F1 Score: 0.7383
+  ROC AUC: 0.6686
+
+US Bank Loans:
+  Accuracy: 0.7829
+  F1 Score: 0.8348
+  ROC AUC: 0.7792
+
+Developed Country Equities:
+  Accuracy: 0.5371
+  F1 Score: 0.6087
+  ROC AUC: 0.5229
+
+Emerging Market Equities:
+  Accuracy: 0.4686
+  F1 Score: 0.4686
+  ROC AUC: 0.4495
+
+Emerging Market Debt:
+  Accuracy: 0.5429
+  F1 Score: 0.5745
+  ROC AUC: 0.5589
+
+
+HYPER PARAMETER TUNING
+Evaluation metrics for US Large Cap Equities:
+  Accuracy: 0.5429
+  F1 Score: 0.5833
+  ROC AUC: 0.5761
+
+Evaluation metrics for US Small Cap Equities:
+  Accuracy: 0.4743
+  F1 Score: 0.4889
+  ROC AUC: 0.5099
+
+Evaluation metrics for US Investment Grade Bonds:
+  Accuracy: 0.6000
+  F1 Score: 0.6789
+  ROC AUC: 0.6285
+
+Evaluation metrics for US High Yield Bonds:
+  Accuracy: 0.6857
+  F1 Score: 0.7465
+  ROC AUC: 0.7109
+
+Evaluation metrics for US Bank Loans:
+  Accuracy: 0.8000
+  F1 Score: 0.8485
+  ROC AUC: 0.8421
+
+Evaluation metrics for Developed Country Equities:
+  Accuracy: 0.6171
+  F1 Score: 0.6599
+  ROC AUC: 0.6593
+
+Evaluation metrics for Emerging Market Equities:
+  Accuracy: 0.6400
+  F1 Score: 0.6595
+  ROC AUC: 0.6745
+
+Evaluation metrics for Emerging Market Debt:
+  Accuracy: 0.6343
+  F1 Score: 0.6484
+  ROC AUC: 0.6516
+
+
+RandomSearch
+
+Evaluation metrics for US Large Cap Equities:
+  Accuracy: 0.4636
+  F1 Score: 0.5706
+  ROC AUC: 0.5162
+
+Evaluation metrics for US Small Cap Equities:
+  Accuracy: 0.5402
+  F1 Score: 0.5522
+  ROC AUC: 0.5289
+
+Evaluation metrics for US Investment Grade Bonds:
+  Accuracy: 0.5862
+  F1 Score: 0.6625
+  ROC AUC: 0.6212
+
+Evaluation metrics for US High Yield Bonds:
+  Accuracy: 0.6437
+  F1 Score: 0.6910
+  ROC AUC: 0.7004
+
+Evaluation metrics for US Bank Loans:
+  Accuracy: 0.7586
+  F1 Score: 0.8108
+  ROC AUC: 0.8047
+
+Evaluation metrics for Developed Country Equities:
+  Accuracy: 0.6513
+  F1 Score: 0.6894
+  ROC AUC: 0.6883
+
+Evaluation metrics for Emerging Market Equities:
+  Accuracy: 0.6475
+  F1 Score: 0.6489
+  ROC AUC: 0.6893
+
+Evaluation metrics for Emerging Market Debt:
+  Accuracy: 0.5939
+  F1 Score: 0.5827
+  ROC AUC: 0.6303

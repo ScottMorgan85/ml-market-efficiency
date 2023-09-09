@@ -1,0 +1,219 @@
+Show me how to make the market model for the below indexes and the following dates. The returns are daily and 
+
+Indexes and names for test:
+tickers = ['RUITR Index','RU20INTR Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
+readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt', 'Sentiment Score']
+
+
+
+
+code so far:
+import pandas as pd
+import numpy as np
+from datetime import datetime
+
+merged_df.index = pd.to_datetime(merged_df.index)
+
+# Assuming merged_df is already loaded into your environment
+# Event Table
+events = [
+    {"name": "Lehman Collapse", "event_date": "9/15/2008", "start_date": "9/8/2008", "end_date": "9/22/2008"},
+    {"name": "Russia-Crimea Annexation", "event_date": "3/18/2014", "start_date": "3/11/2014", "end_date": "3/25/2014"},
+    {"name": "ECB QE Announcement", "event_date": "1/22/2015", "start_date": "1/15/2015", "end_date": "1/29/2015"},
+    {"name": "Brexit Vote", "event_date": "6/23/2016", "start_date": "6/16/2016", "end_date": "6/30/2016"},
+    {"name": "COVID-19 Pandemic", "event_date": "3/11/2020", "start_date": "3/4/2020", "end_date": "3/18/2020"},
+    {"name": "Russia-Ukraine War", "event_date": "2/24/2022", "start_date": "2/17/2022", "end_date": "3/3/2022"},
+]
+
+asset_classes = merged_df.columns[:-1]  # Excluding the sentiment score
+
+results = []
+
+for event in events:
+    start = datetime.strptime(event['start_date'], "%m/%d/%Y")
+    event_day = datetime.strptime(event['event_date'], "%m/%d/%Y")
+    end = datetime.strptime(event['end_date'], "%m/%d/%Y")
+    
+    event_results = {
+        "Event": event['name'],
+    }
+
+    for asset in asset_classes:
+        # Calculate daily returns from start to event day
+        pre_event_daily_returns = merged_df.loc[start:event_day, asset].dropna()
+        
+        # Calculate geometric return for the pre-event period
+        pre_event_geometric_return = (np.prod(1 + pre_event_daily_returns))**(1/len(pre_event_daily_returns)) - 1
+        
+        # Calculate daily returns from event day to end date
+        post_event_daily_returns = merged_df.loc[event_day:end, asset].dropna()
+
+        # Calculate geometric return for the post-event period
+        post_event_geometric_return = (np.prod(1 + post_event_daily_returns))**(1/len(post_event_daily_returns)) - 1
+        
+        event_results[f"{asset} Pre-Event Geometric Return"] = pre_event_geometric_return
+        event_results[f"{asset} Post-Event Geometric Return"] = post_event_geometric_return
+
+    results.append(event_results)
+
+return_df = pd.DataFrame(results)
+
+
+=================================
+
+Please revise the below Bloomberg extraction code to incorporate the tickers you listed above. Make sure you map them somehow to the original indexes. Have them save out to a separate csv file. 
+
+Secondly, re-write your python script that uses regression to by asset class to calculate the expected return and abornormal returns for a given event window.
+
+
+Bloomberg extraction code:
+from xbbg import blp
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, bartlett
+from statsmodels.tsa.stattools import acf
+import statsmodels.api as sm
+from datetime import datetime, timedelta
+import os
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+plt.rcParams['font.family'] = 'sans-serif'
+plt.rcParams['font.sans-serif'] = ['Arial']
+
+%matplotlib inline
+
+tickers = ['RUITR Index','RU20INTR Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
+readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt', 'Sentiment Score']
+
+csv_file_path = "data/index_returns.csv"
+
+def fetch_data(tickers, start_date, end_date):
+    return blp.bdh(tickers=tickers, flds=['Px_Last'], start_date=start_date, end_date=end_date)
+
+date_string = "4/2/2007"
+date_format = "%m/%d/%Y"
+start_date = datetime.strptime(date_string, date_format)
+end_date = datetime.today()
+
+if not os.path.exists(csv_file_path):
+    index_data_raw = fetch_data(tickers, start_date, end_date)
+    index_data_raw.columns = readable_names
+    
+    # Save the Sentiment Score to a separate CSV file
+    sentiment_scores = index_data_raw[['Sentiment Score']]
+    mean_value = sentiment_scores['Sentiment Score'].mean()
+    sentiment_scores['Sentiment Score'].fillna(mean_value, inplace=True)
+    sentiment_scores.to_csv('data/sentiment_scores.csv')
+    
+     # Drop the Sentiment Score column from the main DataFrame
+    index_data_raw = index_data_raw.drop(columns=['Sentiment Score'])
+    index_returns_raw = index_data_raw.pct_change().dropna()
+    
+    # Save Index Returns as separate file
+    threshold = len(index_returns_raw.columns) - 2
+    index_returns = index_returns_raw.dropna(thresh=threshold)
+    index_returns.to_csv(csv_file_path)
+    
+    #Save merged df as separate file
+    merged_df = pd.merge(index_returns, sentiment_scores, how='left', left_index=True, right_index=True)
+    merged_df.to_csv('data/merged_df.csv')
+    
+else:
+    #Load csv files
+    index_returns = pd.read_csv(csv_file_path, index_col=0, parse_dates=True)
+    sentiment_scores=pd.read_csv('data/sentiment_scores.csv', index_col=0, parse_dates=True)
+    merged_df=pd.read_csv('data/merged_df.csv', index_col=0, parse_dates=True)
+
+
+
+this is great. Can you make a function that when given an event name and an event date as well as an input for X days - you are given an event start date of X days before the event_date and X days after. Then use these start and end dates to calculate the start_date to event date returns, and the event date to end date returns. I suppose you need the . Here is a sample below of the current code:
+
+
+
+
+
+Instead of using  "indicators_data_raw=indicators_data_raw.fillna(indicators_data_raw.mean())", rewrite this to somewhat more localized. It's a time series so I would like N/A to be filled with similar recent numbers not just the entire average.
+
+
+
+
+# pip install blpapi --index-url=https://bcms.bloomberg.com/pip/simple/
+
+from xbbg import blp
+import pandas as pd
+from scipy.stats import skew, kurtosis, bartlett
+from statsmodels.tsa.stattools import acf
+import statsmodels.api as sm
+from datetime import datetime, timedelta
+import os
+import warnings
+
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+# Define the mapping of asset classes to their respective economic indicators
+indicator_mapping = {
+    'US Large Cap Equities': ['VIX Index', 'DXY Curncy', 'CL1 Comdty'],
+    'US Small Cap Equities': ['RVX Index', 'EPUCNUSD Index', 'XAU Curncy'],
+    'US Investment Grade Bonds': ['USGG10YR Index', 'BICLB10Y Index', 'FDTR Index'],
+    'US High Yield Bonds': ['HYG Curncy', 'H0A0 Index'],
+    'US Bank Loans': ['US0003M Index', 'PRIME Index'],
+    'Developed Country Equities': ['MXWO Index', 'W1DOW Index', 'EURUSD Curncy'],
+    'Emerging Market Equities': ['MXEF Index', 'LG20TRUU Index'],
+    'Emerging Market Debt': ['JGEGSPD Index', 'MXEF0CX0 Index']
+}
+
+# Get a flat list of all the economic indicator tickers
+all_indicators = [item for sublist in indicator_mapping.values() for item in sublist]
+
+# Your original tickers and other variables
+tickers = ['RIY Index','RTY Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
+readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt', 'Sentiment Score']
+csv_file_path = "data/index_returns.csv"
+
+def fetch_data(tickers, start_date, end_date):
+    return blp.bdh(tickers=tickers, flds=['Px_Last'], start_date=start_date, end_date=end_date)
+
+date_string = "4/2/2007"
+date_format = "%m/%d/%Y"
+start_date = datetime.strptime(date_string, date_format)
+end_date = datetime.today()
+
+if not os.path.exists(csv_file_path):
+    # Extract data for main asset classes
+    index_data_raw = fetch_data(tickers, start_date, end_date)
+    index_data_raw.columns = readable_names
+    
+    # Save the Sentiment Score to a separate CSV file
+    sentiment_scores = index_data_raw[['Sentiment Score']]
+    mean_value = sentiment_scores['Sentiment Score'].mean()
+    sentiment_scores['Sentiment Score'].fillna(mean_value, inplace=True)
+    sentiment_scores.to_csv('data/sentiment_scores.csv')
+    
+    # Drop the Sentiment Score column from the main DataFrame
+    index_data_raw = index_data_raw.drop(columns=['Sentiment Score'])
+    index_returns_raw = index_data_raw.pct_change().dropna()
+    
+    # Save Index Returns as a separate file
+    threshold = len(index_returns_raw.columns) - 2
+    index_returns = index_returns_raw.dropna(thresh=threshold)
+    index_returns.to_csv(csv_file_path)
+    
+    # Extract data for economic indicators and save to separate CSV
+    indicators_data_raw = fetch_data(all_indicators, start_date, end_date)
+    indicators_data_raw=indicators_data_raw.fillna(indicators_data_raw.mean())
+    indicators_data_raw.to_csv('data/economic_indicators.csv')
+    
+    # Save merged df of asset returns and sentiment scores as a separate file
+    merged_df = pd.merge(index_returns, sentiment_scores, how='left', left_index=True, right_index=True)
+    merged_df.to_csv('data/merged_df.csv')
+else:
+    # Load CSV files if they already exist
+    index_returns = pd.read_csv(csv_file_path, index_col=0, parse_dates=True)
+    sentiment_scores = pd.read_csv('data/sentiment_scores.csv', index_col=0, parse_dates=True)
+    indicators_data = pd.read_csv('data/economic_indicators.csv', index_col=0, parse_dates=True)
+    merged_df = pd.read_csv('data/merged_df.csv', index_col=0, parse_dates=True)

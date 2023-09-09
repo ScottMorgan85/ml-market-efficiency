@@ -1,0 +1,112 @@
+streamline this code. I'd like it to pull use blp.bdh once, so combine all the bloomberg api requests into one and then save out the csv files. Before starting the bloomberg api request though, make sure the 3 files (check names) are in the folder. If they are not, run the script to pull from bloomberg. if all three are there, just load the csv files. I one is missing, run just the missing request and save down the csv. Turn off warnings. Give progress updates and when the whole process is done (and which process was used).
+
+
+from xbbg import blp
+import pandas as pd
+from scipy.stats import skew, kurtosis, bartlett
+from statsmodels.tsa.stattools import acf
+import statsmodels.api as sm
+from datetime import datetime, timedelta
+import os
+import warnings
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+import xgboost as xgb
+from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+import time
+import warnings
+from joblib import dump
+import joblib
+import shap
+
+
+
+pd.set_option('mode.chained_assignment', None)
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+# Suppress all warnings
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore")
+
+plt.rcParams["font.family"] = "Arial"  # or another available font
+
+
+# Define the mapping of asset classes to their respective economic indicators
+indicator_mapping = {
+    'US Large Cap Equities': ['VIX Index', 'DXY Curncy', 'CL1 Comdty'],
+    'US Small Cap Equities': ['RVX Index', 'EPUCNUSD Index', 'XAU Curncy'],
+    'US Investment Grade Bonds': ['USGG10YR Index', 'BICLB10Y Index', 'FDTR Index'],
+    'US High Yield Bonds': ['HYG Curncy', 'H0A0 Index'],
+    'US Bank Loans': ['US0003M Index', 'PRIME Index'],
+    'Developed Country Equities': ['MXWO Index', 'W1DOW Index', 'EURUSD Curncy'],
+    'Emerging Market Equities': ['MXEF Index', 'LG20TRUU Index'],
+    'Emerging Market Debt': ['JPEIGLSP Index', 'MXEF0CX0 Index']
+}
+
+# Get a flat list of all the economic indicator tickers
+all_indicators = [item for sublist in indicator_mapping.values() for item in sublist]
+
+# Your original tickers and other variables
+tickers = ['RIY Index','RTY Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
+readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt', 'Sentiment Score']
+csv_file_path = "data/index_returns.csv"
+
+def fetch_data(tickers, start_date, end_date):
+    return blp.bdh(tickers=tickers, flds=['Px_Last'], start_date=start_date, end_date=end_date)
+
+date_string = "4/2/2007"
+date_format = "%m/%d/%Y"
+start_date = datetime.strptime(date_string, date_format)
+end_date = datetime.today()
+
+if not os.path.exists(csv_file_path):
+    
+    #Index prices
+    index_data_raw = fetch_data(tickers, start_date, end_date)
+    index_data_raw.columns = readable_names
+    index_prices = index_data_raw
+    index_prices.index = pd.to_datetime(index_prices.index)
+    index_prices= index_prices[index_prices.index.weekday < 5]
+    index_prices.dropna(inplace=True)
+    index_prices.to_csv('data/index_prices.csv')
+    
+    #Index returns
+    index_returns_raw=index_prices
+    index_returns_raw = index_returns_raw.drop(columns=['Sentiment Score'])
+    index_returns_raw = index_returns_raw.pct_change().dropna()
+    threshold = len(index_returns_raw.columns) - 2
+    index_returns = index_returns_raw.dropna(thresh=threshold)
+    index_returns.index = pd.to_datetime(index_returns.index)
+    index_returns = index_returns[index_returns.index.weekday < 5]
+    index_returns.dropna(inplace=True)
+    index_returns.to_csv(csv_file_path)
+    
+    # Economic Indicators
+    indicators_data_raw = fetch_data(all_indicators, start_date, end_date)
+    indicators_data_raw.interpolate(method='linear', inplace=True)
+
+    # Fill any remaining NaNs by propagating the last valid observation forward
+    indicators_data_raw.ffill(inplace=True)
+
+    # Fill any NaNs at the beginning of the data by using the next valid observation
+    indicators_data_raw.bfill(inplace=True)
+     
+    #get rid of weekend
+    indicators_data_raw.index = pd.to_datetime(indicators_data_raw.index)
+    indicators_data = indicators_data_raw[indicators_data_raw.index.weekday < 5]
+    
+    for col in indicators_data.columns:
+        indicators_data[col] = pd.to_numeric(indicators_data[col], errors='coerce')
+        indicators_data.dropna(inplace=True)
+        indicators_data.to_csv('data/economic_indicators.csv')
+        
+else:
+    # Load CSV files if they already exist
+    index_prices = pd.read_csv('./data/index_prices.csv', index_col=0, parse_dates=True)
+    index_returns = pd.read_csv(csv_file_path, index_col=0, parse_dates=True)
+    indicators_data = pd.read_csv('./data/economic_indicators.csv', index_col=0, parse_dates=True)
+    
+
