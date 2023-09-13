@@ -62,11 +62,10 @@ def get_test_dates(df, pre_days, post_days_list):
     return test_dates_dict
 
 # Function to train the models and evaluate them
-def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
-    # [Add the body of the function from your original code]
-    print("Training initial models...")
-    
+def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, day):
+    print(f'Training {asset_class} {day} day model...')
     results = {}
+    
     for asset in X_train_dict:
         X_train = X_train_dict[asset]
         y_train = y_train_dict[asset]
@@ -74,7 +73,7 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
         X_test = X_test_dict[asset]
         y_test = y_test_dict[asset]
         
-        model = XGBClassifier(objective='binary:logistic', tree_method='gpu_hist')
+        model = XGBClassifier(objective='binary:logistic', tree_method='hist',device="cuda")
         model.fit(X_train, y_train)
         
         y_pred = model.predict(X_test)
@@ -86,9 +85,13 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
             'F1 Score': f1_score(y_test, y_pred),
             'ROC AUC': roc_auc_score(y_test, y_pred_proba)
         }
+    return results, model
 
-def main():
+# Function to loop through days and save information
+def main(combined_data):
     print("Main function started")
+    
+    days_after_event = [5, 30, 60, 90]
     
     asset_columns = [name for name in readable_names if name != 'Sentiment Score']
     
@@ -97,28 +100,26 @@ def main():
         os.makedirs('./models/')
     
     # Dictionary declarations
-   
     test_dates_dict = get_test_dates(df_events, 0, days_after_event)
-    all_evaluation_metrics = {}
+    all_evaluation_metrics = {asset: {} for asset in readable_names}
     X_train_dict = {}
     y_train_dict = {}
     X_test_dict = {}
-    y_test_dict = {} 
-
-    # Loop through each day interval
+    y_test_dict = {}
+   
     for days in days_after_event:
         test_dates = test_dates_dict[days]
+        
         for asset_class in readable_names:
-            
             # Filter columns related to the current asset class
             relevant_columns = [col for col in combined_data.columns if col.startswith(asset_class)]
             
             asset_data = combined_data[relevant_columns]
-            
-            # Assuming the target variable for each asset class is simply its name (e.g., 'US Large Cap Equities')
+
+            # Assuming the target variable for each asset class is simply its name
             if asset_class not in asset_data.columns:
                 continue
-            
+
             train = asset_data[~asset_data.index.isin(test_dates)]
             test = asset_data[asset_data.index.isin(test_dates)]
 
@@ -128,26 +129,73 @@ def main():
             X_test_dict[asset_class] = test.drop(asset_class, axis=1)
             y_test_dict[asset_class] = test[asset_class]
 
-            # Step 2: Train the models using the dictionaries
-            evaluation_metrics, model = train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict)
-            all_evaluation_metrics[f"{asset_class}_{days} days"] = evaluation_metrics
+            # Train the model
+            evaluation_metrics, model = train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, days)
+            all_evaluation_metrics[asset_class][f"{days} days"] = evaluation_metrics[asset_class]["F1 Score"]
 
             # Save the trained model
-            with open(f'./models/{asset_class}_model_{days}_days.pkl', 'wb') as f:
+            model_save_path = f'./models/{asset_class}_model_{days}_days.pkl'
+            if not os.path.exists(os.path.dirname(model_save_path)):
+                os.makedirs(os.path.dirname(model_save_path))
+            with open(model_save_path, 'wb') as f:
                 pickle.dump(model, f)
 
-    # Aggregate all evaluation metrics into a single dataframe
-    staging_evaluation_df = pd.concat({k: pd.DataFrame(v).T for k, v in all_evaluation_metrics.items()}, axis=0)
-    pivot_df = staging_evaluation_df.unstack(level=0)
-    pivot_df.columns = pivot_df.columns.get_level_values(1)
-    ordered_columns = ['5 days', '30 days', '60 days', '90 days']
-    final_evaluation_df = pivot_df[ordered_columns]
+    # Convert nested dictionary to DataFrame
+    result_df = pd.DataFrame(all_evaluation_metrics).T
+    result_df = result_df[['5 days', '30 days', '60 days', '90 days']]
+    return result_df
+
+def highlight_f1(row):
+    return ['background-color: yellow' if col == 'F1 Score' else '' for col in row.index]
+
+def display_styled_evaluation(combined_data, highlight_function):
+    final_table = main(combined_data)
+
+    styled_evaluation_df = (final_table.style
+                            .apply(highlight_function)
+                            .format("{:.2f}")
+                            .set_caption("<b style='font-size: 16px'>F1 Metrics for XGBoost Across Different Time Intervals</b>")
+                            .set_table_styles({
+                                'F1 Score': [{'selector': '',
+                                              'props': [('color', 'black'),
+                                                        ('font-weight', 'bold')]}]
+                            }))
+
+    display(styled_evaluation_df)
     
-    # Optionally: Print or save the final dataframe
-    print(final_evaluation_df)
+    # return final_table
+    
+def plot_f1_scores_over_time(final_table):
+    """
+    Plots F1 scores across different time intervals based on the given DataFrame.
+    
+    Parameters:
+    - result_df: DataFrame containing F1 scores.
+    """
+    # Set a seaborn style for better aesthetics
+    sns.set(style="whitegrid")
 
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(12, 6))
 
+    # Define colors for each category
+    colors = sns.color_palette("husl", n_colors=len(result_df))
+    # colors = asset_colors
 
+    # Iterate through each row (category) in result_df
+    for i, (index, row) in enumerate(final_table.iterrows()):
+        # Plot a smooth line for each category with the corresponding color
+        plt.plot(row.index, row.values, marker='o', label=index, color=colors[i], linewidth=2)
 
+    # Customize the plot
+    plt.title("F1 Score Across Different Time Intervals", fontsize=16)
+    plt.xlabel("Time Intervals", fontsize=14)
+    plt.ylabel("F1 Score", fontsize=14)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
 
-
+    # Display the plot
+    plt.tight_layout()
+    plt.show()

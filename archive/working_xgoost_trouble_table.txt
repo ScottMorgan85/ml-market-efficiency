@@ -1,0 +1,83 @@
+import os
+import pickle
+from IPython.display import display
+import pandas as pd
+import jinja2
+
+def main():
+    print("Main function started")
+    
+    days_after_event = [5, 30, 60, 90]
+    
+    asset_columns = [name for name in readable_names if name != 'Sentiment Score']
+    
+    # Ensure the necessary directories exist
+    if not os.path.exists('./models/'):
+        os.makedirs('./models/')
+    
+    # Dictionary declarations
+    test_dates_dict = get_test_dates(df_events, 0, days_after_event)
+    all_evaluation_metrics = {}
+    X_train_dict = {}
+    y_train_dict = {}
+    X_test_dict = {}
+    y_test_dict = {}
+   
+    for days in days_after_event:
+        test_dates = test_dates_dict[days]
+        
+        for asset_class in readable_names:
+            # Filter columns related to the current asset class
+            relevant_columns = [col for col in combined_data.columns if col.startswith(asset_class)]
+            
+            asset_data = combined_data[relevant_columns]
+
+            # Assuming the target variable for each asset class is simply its name
+            if asset_class not in asset_data.columns:
+                continue
+
+            train = asset_data[~asset_data.index.isin(test_dates)]
+            test = asset_data[asset_data.index.isin(test_dates)]
+
+            X_train_dict[asset_class] = train.drop(asset_class, axis=1)
+            y_train_dict[asset_class] = train[asset_class]
+            
+            X_test_dict[asset_class] = test.drop(asset_class, axis=1)
+            y_test_dict[asset_class] = test[asset_class]
+
+            # Train the model
+            evaluation_metrics, model = train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, days)
+            all_evaluation_metrics[f"{asset_class}_{days} days"] = evaluation_metrics
+
+            # Save the trained model
+            model_save_path = f'./models/{asset_class}_model_{days}_days.pkl'
+            if not os.path.exists(os.path.dirname(model_save_path)):
+                os.makedirs(os.path.dirname(model_save_path))
+            with open(model_save_path, 'wb') as f:
+                pickle.dump(model, f)
+
+    # Aggregate the results
+    staging_evaluation_df = pd.concat({k: pd.DataFrame(v).T for k, v in all_evaluation_metrics.items()}, axis=0)
+    
+    pivot_df = staging_evaluation_df.unstack(level=0)
+    pivot_df.columns = pivot_df.columns.get_level_values(1)
+    
+    return pivot_df
+
+def highlight_f1(row):
+    return ['background-color: yellow' if col == 'F1 Score' else '' for col in row.index]
+
+# Run the main function
+final_evaluation_df = main()
+
+# Apply styling and display the dataframe
+styled_evaluation_df = (final_evaluation_df.style
+                        .apply(highlight_f1)
+                        .format("{:.2f}")
+                        .set_caption("<b style='font-size: 16px'>F1 Metrics for XGBoost Across Different Time Intervals</b>")
+                        .set_table_styles({
+                            'F1 Score': [{'selector': '',
+                                          'props': [('color', 'black'),
+                                                    ('font-weight', 'bold')]}]
+                        }))
+display(styled_evaluation_df)
