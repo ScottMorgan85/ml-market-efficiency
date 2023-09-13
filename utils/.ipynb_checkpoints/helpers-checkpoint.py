@@ -22,9 +22,9 @@ import plotly.graph_objects as go
 from IPython.display import display, HTML
 import pickle
 import ta
-# from keras.models import Sequential
-# from keras.layers import Dense
-# from keras.optimizers import Adam
+from keras.models import Sequential
+from keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
 import h5py
 
 
