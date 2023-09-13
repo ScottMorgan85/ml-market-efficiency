@@ -1,8 +1,3 @@
-# import os
-# import pandas as pd
-# from datetime import datetime
-# from xbbg import blp
-
 from utils.helpers import *
 
 def fetch_data(tickers, start_date, end_date):
@@ -104,6 +99,6 @@ def generate_technical_indicators(df):
 def generate_and_combine(dataframe, lagged_targets):
     technical_features = generate_technical_indicators(dataframe)
     combined_data = pd.concat([technical_features, lagged_targets], axis=1)
-    combined_data = combined_data.dropna(inplace=True)
+    combined_data.dropna(inplace=True)
     print("Feature engineering completed.")
     return combined_data

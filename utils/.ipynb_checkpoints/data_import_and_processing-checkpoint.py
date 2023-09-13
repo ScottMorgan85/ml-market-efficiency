@@ -2,6 +2,7 @@
 # import pandas as pd
 # from datetime import datetime
 # from xbbg import blp
+import ta
 
 from utils.helpers import *
 

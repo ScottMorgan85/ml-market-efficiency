@@ -1,21 +1,6 @@
-import warnings
-from tqdm import TqdmExperimentalWarning
-warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
-
-
-# import matplotlib.pyplot as plt
-# import statsmodels.api as sm
 from utils.helpers import *
-# import os
-# import pickle
-# import pandas as pd
-# from xgboost import XGBClassifier
-# from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score
-# from utils.helpers import asset_columns
 
-
-
-print(asset_columns)
+# print(asset_columns)
 
 
 ## Weak Form 
@@ -81,9 +66,6 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
     # [Add the body of the function from your original code]
     print("Training initial models...")
     
-    # DataFrame to store feature importances for all assets
-    feature_importances_df = pd.DataFrame()
-    
     results = {}
     for asset in X_train_dict:
         X_train = X_train_dict[asset]
@@ -94,16 +76,6 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
         
         model = XGBClassifier(objective='binary:logistic', tree_method='gpu_hist')
         model.fit(X_train, y_train)
-        
-        # # Extract feature importances
-        # feature_importances = model.feature_importances_
-        # temp_df = pd.DataFrame({
-        #     'Feature': X_train.columns,
-        #     'Importance': feature_importances,
-        #     'Asset': asset  # Adding the asset name to differentiate
-        # })
-        # # feature_importances_df = feature_importances_df.append(temp_df)
-        # feature_importances_df = pd.concat([feature_importances_df, temp_df], ignore_index=True)
         
         y_pred = model.predict(X_test)
         y_pred_proba = model.predict_proba(X_test)[:, 1]
@@ -117,6 +89,8 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
 
 def main():
     print("Main function started")
+    
+    asset_columns = [name for name in readable_names if name != 'Sentiment Score']
     
     # Ensure the necessary directories exist
     if not os.path.exists('./models/'):
@@ -134,7 +108,7 @@ def main():
     # Loop through each day interval
     for days in days_after_event:
         test_dates = test_dates_dict[days]
-        for asset_class in asset_classes:
+        for asset_class in readable_names:
             
             # Filter columns related to the current asset class
             relevant_columns = [col for col in combined_data.columns if col.startswith(asset_class)]

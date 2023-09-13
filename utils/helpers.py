@@ -1,8 +1,8 @@
 import warnings
-from tqdm import TqdmExperimentalWarning
-warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
+# from tqdm import TqdmExperimentalWarning
+# warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 
-from xbbg import blp
+# from xbbg import blp
 import pandas as pd
 import os
 from scipy.stats import skew, kurtosis, bartlett
@@ -21,16 +21,17 @@ import shap
 import plotly.graph_objects as go
 from IPython.display import display, HTML
 import pickle
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.optimizers import Adam
+import ta
+# from keras.models import Sequential
+# from keras.layers import Dense
+# from keras.optimizers import Adam
 import h5py
 
 
 
 # Define the file paths and tickers
 tickers = ['RIY Index','RTY Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
-readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt', 'Sentiment Score']
+readable_names = ['US Large Cap Equities','US Small Cap Equities','US Investment Grade Bonds', 'US High Yield Bonds', 'US Bank Loans', 'Developed Country Equities', 'Emerging Market Equities','Emerging Market Debt']  ##, 'Sentiment Score'
 
 # Color mapping for asset classes
 asset_colors = {
