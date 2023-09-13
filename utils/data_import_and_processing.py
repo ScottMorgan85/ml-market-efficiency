@@ -1,8 +1,9 @@
-import os
-import pandas as pd
-from datetime import datetime
-from xbbg import blp
-import ta
+# import os
+# import pandas as pd
+# from datetime import datetime
+# from xbbg import blp
+
+from utils.helpers import *
 
 def fetch_data(tickers, start_date, end_date):
     return blp.bdh(tickers=tickers, flds=['Px_Last'], start_date=start_date, end_date=end_date)

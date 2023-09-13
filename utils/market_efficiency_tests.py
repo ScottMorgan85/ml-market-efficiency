@@ -1,14 +1,20 @@
-import matplotlib.pyplot as plt
-import statsmodels.api as sm
+import warnings
+from tqdm import TqdmExperimentalWarning
+warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
+
+
+# import matplotlib.pyplot as plt
+# import statsmodels.api as sm
 from utils.helpers import *
-import os
-import pickle
-import pandas as pd
-from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score
-import ta
-from utils.helpers import *
-from utils.helpers import asset_columns
+# import os
+# import pickle
+# import pandas as pd
+# from xgboost import XGBClassifier
+# from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score
+# from utils.helpers import asset_columns
+
+
+
 print(asset_columns)
 
 
@@ -89,15 +95,15 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict):
         model = XGBClassifier(objective='binary:logistic', tree_method='gpu_hist')
         model.fit(X_train, y_train)
         
-        # Extract feature importances
-        feature_importances = model.feature_importances_
-        temp_df = pd.DataFrame({
-            'Feature': X_train.columns,
-            'Importance': feature_importances,
-            'Asset': asset  # Adding the asset name to differentiate
-        })
-        # feature_importances_df = feature_importances_df.append(temp_df)
-        feature_importances_df = pd.concat([feature_importances_df, temp_df], ignore_index=True)
+        # # Extract feature importances
+        # feature_importances = model.feature_importances_
+        # temp_df = pd.DataFrame({
+        #     'Feature': X_train.columns,
+        #     'Importance': feature_importances,
+        #     'Asset': asset  # Adding the asset name to differentiate
+        # })
+        # # feature_importances_df = feature_importances_df.append(temp_df)
+        # feature_importances_df = pd.concat([feature_importances_df, temp_df], ignore_index=True)
         
         y_pred = model.predict(X_test)
         y_pred_proba = model.predict_proba(X_test)[:, 1]

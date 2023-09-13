@@ -1,3 +1,8 @@
+import warnings
+from tqdm import TqdmExperimentalWarning
+warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
+
+
 from xbbg import blp
 import pandas as pd
 import os
@@ -5,19 +10,16 @@ from scipy.stats import skew, kurtosis, bartlett
 from statsmodels.tsa.stattools import acf
 import statsmodels.api as sm
 from datetime import datetime, timedelta
-import warnings
-import numpy as np
+# import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
-import xgboost as xgb
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, precision_score, recall_score
-from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score,recall_score
 import time
 import joblib
 import shap
 import plotly.graph_objects as go
 from IPython.display import display, HTML
-from xgboost import XGBClassifier
 import pickle
 
 
