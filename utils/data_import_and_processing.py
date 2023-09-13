@@ -43,7 +43,7 @@ def fetch_and_save_data(tickers, start_date, end_date, index_prices_path, index_
         index_returns = pd.read_csv(index_returns_path, index_col=0, parse_dates=True)
         print("Data loaded from existing CSV files.")
 
-    print("Process completed.")
+    print("Data import process completed.")
     return index_prices, index_returns
 
 def generate_lagged_returns_and_targets(index_returns):
@@ -56,6 +56,7 @@ def generate_lagged_returns_and_targets(index_returns):
         lagged_returns[column] = (lagged_returns[column] > 0).astype(int)
     
     return lagged_returns
+    print("Generation of lagged return targets completed.")
 
 def MACD(series, short_window, long_window, signal_window):
     short_ema = series.ewm(span=short_window, adjust=False).mean()
@@ -103,4 +104,5 @@ def generate_and_combine(dataframe, lagged_targets):
     technical_features = generate_technical_indicators(dataframe)
     combined_data = pd.concat([technical_features, lagged_targets], axis=1)
     combined_data = combined_data.dropna(inplace=True)
+    print("Feature engineering completed.")
     return combined_data

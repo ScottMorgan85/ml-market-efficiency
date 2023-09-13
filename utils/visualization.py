@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import skew, kurtosis
 import plotly.graph_objects as go
 from IPython.display import display, HTML
-from utils.constants import df_events, asset_columns, asset_colors
+from utils.helpers import df_events, asset_columns, asset_colors
 
 
 def calculate_skewness_kurtosis(data):

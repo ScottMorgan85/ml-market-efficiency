@@ -20,17 +20,6 @@ from IPython.display import display, HTML
 from xgboost import XGBClassifier
 import pickle
 
-def get_test_dates(df, pre_days, post_days_list):
-    test_dates_dict = {}
-    for post_days in post_days_list:
-        test_dates = []
-        for date in df['Event Date']:
-            start_date = date - timedelta(days=pre_days)
-            end_date = date + timedelta(days=post_days)
-            test_dates.extend(pd.date_range(start=start_date, end=end_date).tolist())
-        test_dates_dict[post_days] = test_dates
-    return test_dates_dict
-
 
 # Define the file paths and tickers
 tickers = ['RIY Index','RTY Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
