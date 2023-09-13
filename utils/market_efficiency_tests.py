@@ -162,8 +162,8 @@ def display_styled_evaluation(combined_data, highlight_function):
                             }))
 
     display(styled_evaluation_df)
-    
-    # return final_table
+    return final_table, styled_evaluation_df  # Return both DataFrames
+
     
 def plot_f1_scores_over_time(final_table):
     """

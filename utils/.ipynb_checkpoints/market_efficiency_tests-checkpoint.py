@@ -88,7 +88,7 @@ def train_initial_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, a
     return results, model
 
 # Function to loop through days and save information
-def main():
+def main(combined_data):
     print("Main function started")
     
     days_after_event = [5, 30, 60, 90]
@@ -143,8 +143,59 @@ def main():
     # Convert nested dictionary to DataFrame
     result_df = pd.DataFrame(all_evaluation_metrics).T
     result_df = result_df[['5 days', '30 days', '60 days', '90 days']]
-    
     return result_df
 
 def highlight_f1(row):
     return ['background-color: yellow' if col == 'F1 Score' else '' for col in row.index]
+
+def display_styled_evaluation(combined_data, highlight_function):
+    final_table = main(combined_data)
+
+    styled_evaluation_df = (final_table.style
+                            .apply(highlight_function)
+                            .format("{:.2f}")
+                            .set_caption("<b style='font-size: 16px'>F1 Metrics for XGBoost Across Different Time Intervals</b>")
+                            .set_table_styles({
+                                'F1 Score': [{'selector': '',
+                                              'props': [('color', 'black'),
+                                                        ('font-weight', 'bold')]}]
+                            }))
+
+    display(styled_evaluation_df)
+    return final_table, styled_evaluation_df  # Return both DataFrames
+
+    
+def plot_f1_scores_over_time(final_table):
+    """
+    Plots F1 scores across different time intervals based on the given DataFrame.
+    
+    Parameters:
+    - result_df: DataFrame containing F1 scores.
+    """
+    # Set a seaborn style for better aesthetics
+    sns.set(style="whitegrid")
+
+    # Create a figure and axis
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Define colors for each category
+    colors = sns.color_palette("husl", n_colors=len(result_df))
+    # colors = asset_colors
+
+    # Iterate through each row (category) in result_df
+    for i, (index, row) in enumerate(final_table.iterrows()):
+        # Plot a smooth line for each category with the corresponding color
+        plt.plot(row.index, row.values, marker='o', label=index, color=colors[i], linewidth=2)
+
+    # Customize the plot
+    plt.title("F1 Score Across Different Time Intervals", fontsize=16)
+    plt.xlabel("Time Intervals", fontsize=14)
+    plt.ylabel("F1 Score", fontsize=14)
+    plt.xticks(rotation=45, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.legend(fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+
+    # Display the plot
+    plt.tight_layout()
+    plt.show()
