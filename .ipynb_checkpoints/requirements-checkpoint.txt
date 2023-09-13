@@ -1,0 +1,24 @@
+# requirements.txt
+
+# Basics
+pandas
+matplotlib
+seaborn
+scipy
+statsmodels
+pickle
+jupyter
+
+# For GPU usage
+xgboost==1.4.2
+tensorflow==2.5.0
+
+# Other packages
+joblib
+shap
+plotly
+IPython
+h5py
+keras
+
+
