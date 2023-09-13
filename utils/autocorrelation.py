@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from utils.constants import asset_colors
 
+
+##Weak form 
 def plot_autocorrelation(index_returns, readable_names):
     """
     Plots the autocorrelation of given indices.
