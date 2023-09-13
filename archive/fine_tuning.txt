@@ -1,0 +1,41 @@
+
+
+# # A function to adapt and evaluate models using transfer learning
+# def transfer_and_evaluate(combined_data):
+
+# #     # Standardize data
+#     scaler = StandardScaler().fit(X_train)
+#     X_train = scaler.transform(X_train)
+#     X_test = scaler.transform(X_test)
+    
+# #     # Fine-tuning
+# #     model = Sequential(base_model.layers[:-1])  # Exclude last layer
+# #     model.add(Dense(1, activation='sigmoid'))
+# #     model.compile(optimizer=Adam(0.001), loss='binary_crossentropy', metrics=['accuracy'])
+    
+#     # model.fit(X_train, y_train, epochs=10, batch_size=32, verbose=0, validation_split=0.2)
+    
+#     y_pred_proba = model.predict(X_test).flatten()
+#     y_pred = (y_pred_proba > 0.5).astype(int)
+    
+#     asset_results = {
+#         'Accuracy': accuracy_score(y_test, y_pred),
+#         'Precision': precision_score(y_test, y_pred),
+#         'F1 Score': f1_score(y_test, y_pred),
+#         'ROC AUC': roc_auc_score(y_test, y_pred_proba)
+#     }
+    
+#     return asset_results
+
+# # 3. Evaluate on New Data
+# transfer_results = {}
+# asset_columns = ['US Large Cap Equities', 'US Small Cap Equities',
+#                  'US Investment Grade Bonds', 'US High Yield Bonds', 
+#                  'Developed Country Equities', 'Emerging Market Equities',
+#                  'Emerging Market Debt']
+
+# for asset in asset_columns:
+#     transfer_results[asset] = transfer_and_evaluate(asset)
+
+# transfer_evaluation_df = pd.DataFrame(transfer_results).T
+# print(transfer_evaluation_df)

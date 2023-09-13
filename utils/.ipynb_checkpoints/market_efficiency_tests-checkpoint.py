@@ -373,3 +373,108 @@ def keras_display_styled_evaluation(combined_data, highlight_function):
     print("Cleanup complete!")
     
     return final_table, styled_evaluation_df  # Return both DataFrames
+
+################################
+## transfer learning functions
+###################################
+
+def score_transfer_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, day):
+    print(f'Scoring {asset_class} {day} day with Bank Loan Keras {day} day model...')
+    results = {}
+    
+    for asset in X_train_dict:
+        X_train = X_train_dict[asset]
+        y_train = y_train_dict[asset]
+        
+        X_test = X_test_dict[asset]
+        y_test = y_test_dict[asset]
+        
+        
+         # Standardizing the data
+        scaler = StandardScaler().fit(X_train)
+        X_train = scaler.transform(X_train)
+        X_test = scaler.transform(X_test)
+        
+        model=load_model(f'./models/US Bank Loans_Keras_model_{day}_days.keras')
+    
+        # Predict
+        y_pred_proba = model.predict(X_test).flatten()
+        y_pred = (y_pred_proba > 0.5).astype(int)
+        
+        results[asset] = {
+            'Accuracy': accuracy_score(y_test, y_pred),
+            'Precision': precision_score(y_test, y_pred),
+            'F1 Score': f1_score(y_test, y_pred),
+            'ROC AUC': roc_auc_score(y_test, y_pred_proba)
+        }
+    return results
+
+# Function to loop through days and save information
+def keras_scoring_main(combined_data):
+    print("Main function started")
+    
+    days_after_event = [5, 30, 60, 90]
+    
+    asset_columns = [name for name in readable_names if name != 'Sentiment Score']
+    
+    # Ensure the necessary directories exist
+    if not os.path.exists('./models/'):
+        os.makedirs('./models/')
+    
+    # Dictionary declarations
+    test_dates_dict = get_test_dates(df_events, 0, days_after_event)
+    all_evaluation_metrics = {asset: {} for asset in readable_names}
+    X_train_dict = {}
+    y_train_dict = {}
+    X_test_dict = {}
+    y_test_dict = {}
+   
+    for days in days_after_event:
+        test_dates = test_dates_dict[days]
+        
+        for asset_class in readable_names:
+            # Filter columns related to the current asset class
+            relevant_columns = [col for col in combined_data.columns if col.startswith(asset_class)]
+            
+            asset_data = combined_data[relevant_columns]
+
+            # Assuming the target variable for each asset class is simply its name
+            if asset_class not in asset_data.columns:
+                continue
+
+            train = asset_data[~asset_data.index.isin(test_dates)]
+            test = asset_data[asset_data.index.isin(test_dates)]
+
+            X_train_dict[asset_class] = train.drop(asset_class, axis=1)
+            y_train_dict[asset_class] = train[asset_class]
+            
+            X_test_dict[asset_class] = test.drop(asset_class, axis=1)
+            y_test_dict[asset_class] = test[asset_class]
+            
+            # model= load_model(f'./models/US Bank Loans_Keras_model_{days}_days.keras')
+
+            # Train the model
+            evaluation_metrics = score_transfer_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, days)
+            all_evaluation_metrics[asset_class][f"{days} days"] = evaluation_metrics[asset_class]["F1 Score"]
+
+
+
+    # Convert nested dictionary to DataFrame
+    result_df = pd.DataFrame(all_evaluation_metrics).T
+    result_df = result_df[['5 days', '30 days', '60 days', '90 days']]
+    return result_df
+
+def transfer_display_styled_evaluation(combined_data, highlight_function):
+    final_table = keras_scoring_main(combined_data)
+
+    styled_evaluation_df = (final_table.style
+                            .apply(highlight_function)
+                            .format("{:.2f}")
+                            .set_caption("<b style='font-size: 16px'>F1 Metrics for Keras Across Different Time Intervals</b>")
+                            .set_table_styles({
+                                'F1 Score': [{'selector': '',
+                                              'props': [('color', 'black'),
+                                                        ('font-weight', 'bold')]}]
+                            }))
+
+    display(styled_evaluation_df)
