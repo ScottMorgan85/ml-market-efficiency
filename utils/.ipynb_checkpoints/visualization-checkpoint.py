@@ -5,7 +5,7 @@ import numpy as np
 from scipy.stats import skew, kurtosis
 import plotly.graph_objects as go
 from IPython.display import display, HTML
-from utils.constants import df_events, asset_columns, asset_colors
+from utils.helpers import *
 
 
 def calculate_skewness_kurtosis(data):
@@ -28,6 +28,8 @@ def calculate_skewness_kurtosis(data):
         'Skewness': skewness_values,
         'Kurtosis': kurtosis_values
     })
+    
+    print(skew_kurt_df)
     
     return skew_kurt_df
 
@@ -150,7 +152,10 @@ def plot_correlation(index_returns, start_date, end_date):
     plt.title(title, fontsize=14)
     plt.show()
 
+
     
+from IPython.display import display, HTML
+import plotly.graph_objects as go
 
 def plot_cumulative_returns_with_events(index_returns):
     cumulative_returns = (1 + index_returns).cumprod()

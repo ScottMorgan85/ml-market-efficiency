@@ -29,6 +29,8 @@ def calculate_skewness_kurtosis(data):
         'Kurtosis': kurtosis_values
     })
     
+    print(skew_kurt_df)
+    
     return skew_kurt_df
 
 def plot_distribution(data, skew_kurt_df, start_date, end_date, num_rows=4, num_cols=2):
