@@ -234,7 +234,7 @@ def plot_f1_scores_over_time(final_table):
 
     
 ###########################
-## Strong Form
+## Strong Form - Keras
 ###########################
 
 # Function to train the models and evaluate them
@@ -336,8 +336,15 @@ def keras_main(combined_data):
 
 def keras_display_styled_evaluation(combined_data, highlight_function):
     final_table = keras_main(combined_data)
+   
+    # Calculate average F1 scores for each asset class
+    final_table["Average F1"] = final_table.mean(axis=1)
 
-    styled_evaluation_df = (final_table.style
+    # Identify the best performing asset class
+    best_asset_class = final_table["Average F1"].idxmax()
+    print(f"The best performing asset class is: {best_asset_class}")
+    
+    keras_styled_evaluation_df = (final_table.style
                             .apply(highlight_function)
                             .format("{:.2f}")
                             .set_caption("<b style='font-size: 16px'>F1 Metrics for Keras Across Different Time Intervals</b>")
@@ -347,14 +354,7 @@ def keras_display_styled_evaluation(combined_data, highlight_function):
                                                         ('font-weight', 'bold')]}]
                             }))
 
-    display(styled_evaluation_df)
-    
-    # Calculate average F1 scores for each asset class
-    final_table["Average F1"] = final_table.mean(axis=1)
-
-    # Identify the best performing asset class
-    best_asset_class = final_table["Average F1"].idxmax()
-    print(f"The best performing asset class is: {best_asset_class}")
+    # display(keras_styled_evaluation_df)
 
     # Delete models for other asset classes
     model_folder = './models/'
@@ -367,11 +367,10 @@ def keras_display_styled_evaluation(combined_data, highlight_function):
 
         if best_asset_class not in model_file:
             os.remove(full_path)
-            # print(f"Deleted: {model_file}")
 
     print("Cleanup complete!")
     
-    return final_table, styled_evaluation_df  # Return both DataFrames
+    return final_table, keras_styled_evaluation_df  # Return both DataFrames
 
 ################################
 ## transfer learning functions
