@@ -100,9 +100,9 @@ def plot_drawdowns(index_returns, start_date, end_date):
 
     # Get the minimum y-axis value
     min_y_value = largest_drawdowns.min() - 0.1
-
+  
     # Visualization
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(9, 6))
 
     # Define the color gradient based on the values
     colors = plt.cm.Reds(np.linspace(0.1, 1, len(largest_drawdowns)))
@@ -151,6 +151,7 @@ def plot_correlation(index_returns, start_date, end_date):
     title = f"Correlation Matrix between Asset Classes ({start_date.strftime('%m/%d/%Y')} to {end_date.strftime('%m/%d/%Y')})"
     plt.title(title, fontsize=14)
     plt.show()
+   
 
 
     

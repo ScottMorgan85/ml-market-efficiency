@@ -1,4 +1,5 @@
 import warnings
+warnings.filterwarnings("ignore")
 # from tqdm import TqdmExperimentalWarning
 # warnings.filterwarnings("ignore", category=TqdmExperimentalWarning)
 
@@ -27,8 +28,6 @@ from keras.layers import Dense
 from tensorflow.keras.optimizers import Adam
 import h5py
 from keras.models import load_model
-
-
 
 # Define the file paths and tickers
 tickers = ['RIY Index','RTY Index', 'C0A0 Index','H0A0 Index','SPBDAL Index', 'MXEA Index', 'MXEF Index','EMUSTRUU Index', 'SFFRNEWS Index']
