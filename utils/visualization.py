@@ -221,7 +221,7 @@ def plot_cumulative_returns_with_events(index_returns):
             textangle=90
         )
 
-    fig.update_layout(title='Cumulative Returns with Key Events Test/Train Periods Highlighted', yaxis_title='Cumulative Return', height=600)
+    fig.update_layout(title='Cumulative Returns and Model Test/Train Periods', yaxis_title='Cumulative Return', height=600)
     fig.show()
 
 def display_event_table():

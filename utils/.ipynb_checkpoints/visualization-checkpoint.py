@@ -151,8 +151,6 @@ def plot_correlation(index_returns, start_date, end_date):
     title = f"Correlation Matrix between Asset Classes ({start_date.strftime('%m/%d/%Y')} to {end_date.strftime('%m/%d/%Y')})"
     plt.title(title, fontsize=14)
     plt.show()
-   
-
 
     
 from IPython.display import display, HTML
@@ -223,7 +221,7 @@ def plot_cumulative_returns_with_events(index_returns):
             textangle=90
         )
 
-    fig.update_layout(title='Cumulative Returns with Key Events Test/Train Periods Highlighted', yaxis_title='Cumulative Return', height=600)
+    fig.update_layout(title='Cumulative Returns and Model Test/Train Periods', yaxis_title='Cumulative Return', height=600)
     fig.show()
 
 def display_event_table():

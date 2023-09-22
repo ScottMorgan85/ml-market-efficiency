@@ -1,9 +1,9 @@
 from utils.helpers import *
 
-# print(asset_columns)
-
-
+###########################
 ## Weak Form 
+###########################
+
 def plot_autocorrelation(index_returns, readable_names):
     """
     Plots the autocorrelation of given indices.
@@ -65,6 +65,7 @@ def get_test_dates(df, pre_days, post_days_list):
 ## Semi-Strong Form
 ###########################
 
+## xgboost
 
 # Function to train the models and evaluate them
 def train_initial_xgb_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, day):
@@ -83,7 +84,7 @@ def train_initial_xgb_models(X_train_dict, y_train_dict, X_test_dict, y_test_dic
         X_train = scaler.transform(X_train)
         X_test = scaler.transform(X_test)
         
-        model = XGBClassifier(objective='binary:logistic', tree_method='hist',device="cuda")
+        model = XGBClassifier(objective='binary:logistic', tree_method='hist')
         model.fit(X_train, y_train)
         
         y_pred = model.predict(X_test)
@@ -158,10 +159,17 @@ def main(combined_data):
 def highlight_f1(row):
     return ['background-color: yellow' if col == 'F1 Score' else '' for col in row.index]
 
-def display_styled_evaluation(combined_data, highlight_function):
+def xgb_display_styled_evaluation(combined_data, highlight_function):
     final_table = main(combined_data)
+  
+    # Calculate average F1 scores for each asset class
+    final_table["Average F1"] = final_table.mean(axis=1)
 
-    styled_evaluation_df = (final_table.style
+    # Identify the best performing asset class
+    best_asset_class = final_table["Average F1"].idxmax()
+    print(f"The best performing asset class is: {best_asset_class}")
+    
+    xgb_styled_evaluation_df = (final_table.style
                             .apply(highlight_function)
                             .format("{:.2f}")
                             .set_caption("<b style='font-size: 16px'>F1 Metrics for XGBoost Across Different Time Intervals</b>")
@@ -170,15 +178,6 @@ def display_styled_evaluation(combined_data, highlight_function):
                                               'props': [('color', 'black'),
                                                         ('font-weight', 'bold')]}]
                             }))
-
-    display(styled_evaluation_df)
-    
-    # Calculate average F1 scores for each asset class
-    final_table["Average F1"] = final_table.mean(axis=1)
-
-    # Identify the best performing asset class
-    best_asset_class = final_table["Average F1"].idxmax()
-    print(f"The best performing asset class is: {best_asset_class}")
 
     # Delete models for other asset classes
     model_folder = './models/'
@@ -195,7 +194,7 @@ def display_styled_evaluation(combined_data, highlight_function):
 
     print("Cleanup complete!")
     
-    return final_table, styled_evaluation_df  # Return both DataFrames
+    return final_table, xgb_styled_evaluation_df  # Return both DataFrames
 
     
 def plot_f1_scores_over_time(final_table):
@@ -470,7 +469,7 @@ def transfer_display_styled_evaluation(combined_data, highlight_function):
     styled_evaluation_df = (final_table.style
                             .apply(highlight_function)
                             .format("{:.2f}")
-                            .set_caption("<b style='font-size: 16px'>F1 Metrics for Keras Across Different Time Intervals</b>")
+                            .set_caption("<b style='font-size: 16px'>Transfer Learning F1 Metrics for Keras Across Different Time Intervals</b>")
                             .set_table_styles({
                                 'F1 Score': [{'selector': '',
                                               'props': [('color', 'black'),
