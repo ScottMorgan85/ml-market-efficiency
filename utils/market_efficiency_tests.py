@@ -1,8 +1,5 @@
 from utils.helpers import *
 
-# print(asset_columns)
-
-
 ## Weak Form 
 def plot_autocorrelation(index_returns, readable_names):
     """

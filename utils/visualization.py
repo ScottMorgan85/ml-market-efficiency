@@ -151,8 +151,6 @@ def plot_correlation(index_returns, start_date, end_date):
     title = f"Correlation Matrix between Asset Classes ({start_date.strftime('%m/%d/%Y')} to {end_date.strftime('%m/%d/%Y')})"
     plt.title(title, fontsize=14)
     plt.show()
-   
-
 
     
 from IPython.display import display, HTML
