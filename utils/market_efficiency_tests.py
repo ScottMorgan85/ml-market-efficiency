@@ -473,6 +473,7 @@ def transfer_display_styled_evaluation(combined_data, highlight_function):
                                               'props': [('color', 'black'),
                                                         ('font-weight', 'bold')]}]
                             }))
+    
 
     # display(transfer_styled_evaluation_df)
     return transfer_final_table,transfer_styled_evaluation_df
