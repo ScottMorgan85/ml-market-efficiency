@@ -19,11 +19,12 @@ This project tests the weak, semi-strong, and strong forms of market efficiency 
 ## Installation & Usage
 1. Clone this repository: `git clone https://github.com/ScottMorgan85/MarketEfficiencyLightShed.git`
 3. Install dependencies: `pip install -r requirements.txt`
-4. (Optional) If using Docker: Build the Docker image using the provided `Dockerfile` within the `utils` directory.
+4. (Optional) If using Docker: Build the Docker image using the provided `Dockerfile` within the root directory.
 5. Run Jupyter Notebook or Jupyter Lab to view and execute the analysis.
 
 ## Project Structure
 - `MarketEfficiencyLightShed.ipynb` - Main Jupyter notebook containing the analysis.
+- `Dockerfile` and `requirements.txt` - Contains environment requirements.
 - `utils/` - Contains utility scripts.
 - `data/` - Directory for data storage .
 - `models/` - Directory for saved models.
@@ -33,11 +34,8 @@ The data used for this analysis was sourced from Yahoo!Finance and Bloomberg. It
 
 ## Future Work
 - Exploring variable importance for model predictions.
-- In-depth analysis of individual companies like Apple, Micr0osoft, and AT&T.
-- Integrating generative AI, especially tools like AutoGPT, for dynamic stress-testing and strategy ideation.
+- In-depth analysis of individual companies like Apple, Microsoft, and AT&T.
+- Integrating generative AI, such as AutoGPT, for dynamic stress-testing and strategy ideation.
 
 ## Contributing
 Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
-
-## License
-This project is licensed under the MIT License - see the `LICENSE.md` file for details.
