@@ -268,7 +268,7 @@ def train_initial_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_d
         model.fit(X_train, y_train, epochs=1, batch_size=32, verbose=0, validation_split=0.2)
         
         # Predict
-        y_pred_proba = model.predict(X_test).flatten()
+        y_pred_proba = model.predict(X_test, verbose=0).flatten()
         y_pred = (y_pred_proba > 0.5).astype(int)
         
         results[asset] = {
@@ -377,7 +377,7 @@ def keras_display_styled_evaluation(combined_data, highlight_function):
 ###################################
 
 def score_transfer_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, day):
-    print(f'Scoring {asset_class} {day} day with Bank Loan Keras {day} day model...')
+    # print(f'Scoring {asset_class} {day} day with Bank Loan Keras {day} day model...')
     results = {}
     
     for asset in X_train_dict:
@@ -396,7 +396,7 @@ def score_transfer_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_
         model=load_model(f'./models/US Bank Loans_Keras_model_{day}_days.keras')
     
         # Predict
-        y_pred_proba = model.predict(X_test).flatten()
+        y_pred_proba = model.predict(X_test, verbose=0).flatten()
         y_pred = (y_pred_proba > 0.5).astype(int)
         
         results[asset] = {
@@ -449,7 +449,6 @@ def keras_scoring_main(combined_data):
             X_test_dict[asset_class] = test.drop(asset_class, axis=1)
             y_test_dict[asset_class] = test[asset_class]
             
-            # model= load_model(f'./models/US Bank Loans_Keras_model_{days}_days.keras')
 
             # Train the model
             evaluation_metrics = score_transfer_keras_models(X_train_dict, y_train_dict, X_test_dict, y_test_dict, asset_class, days)
@@ -463,9 +462,9 @@ def keras_scoring_main(combined_data):
     return result_df
 
 def transfer_display_styled_evaluation(combined_data, highlight_function):
-    final_table = keras_scoring_main(combined_data)
+    transfer_final_table = keras_scoring_main(combined_data)
 
-    styled_evaluation_df = (final_table.style
+    transfer_styled_evaluation_df = (transfer_final_table.style
                             .apply(highlight_function)
                             .format("{:.2f}")
                             .set_caption("<b style='font-size: 16px'>Transfer Learning F1 Metrics for Keras Across Different Time Intervals</b>")
@@ -475,4 +474,5 @@ def transfer_display_styled_evaluation(combined_data, highlight_function):
                                                         ('font-weight', 'bold')]}]
                             }))
 
-    display(styled_evaluation_df)
+    # display(transfer_styled_evaluation_df)
+    return transfer_final_table,transfer_styled_evaluation_df
