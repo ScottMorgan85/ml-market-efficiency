@@ -2,6 +2,8 @@
 
 Dive deep into the world of financial markets through a data-driven lens. Using Python and machine learning models, this repository explores different levels of the Efficient Market Hypothesis (EMF) across various asset classes.
 
+See [MarketEfficiencyLightShed.ipynb](https://github.com/ScottMorgan85/ml-market-efficiency/blob/main/MarketEfficiencyLightShed.ipynb) for WIP analysis and write-up.
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Installation & Usage](#installation--usage)
@@ -22,7 +24,7 @@ This project tests the weak, semi-strong, and strong forms of market efficiency 
 
 ## Project Structure
 - `MarketEfficiencyLightShed.ipynb` - Main Jupyter notebook containing the analysis.
-- `utils/` - Contains utility scripts, `requirements.txt`, and the Dockerfile.
+- `utils/` - Contains utility scripts.
 - `data/` - Directory for data storage .
 - `models/` - Directory for saved models.
 
