@@ -2,6 +2,8 @@
 
 Dive deep into the world of financial markets through a data-driven lens. Using Python and machine learning models, this repository explores different levels of the Efficient Market Hypothesis (EMF) across various asset classes.
 
+See MarketEfficiencyLightShed.ipynb for WIP analysis and write-up
+
 ## Table of Contents
 1. [Overview](#overview)
 2. [Installation & Usage](#installation--usage)
