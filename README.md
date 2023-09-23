@@ -24,7 +24,7 @@ This project tests the weak, semi-strong, and strong forms of market efficiency 
 
 ## Project Structure
 - `MarketEfficiencyLightShed.ipynb` - Main Jupyter notebook containing the analysis.
-- `utils/` - Contains utility scripts, `requirements.txt`, and the Dockerfile.
+- `utils/` - Contains utility scripts.
 - `data/` - Directory for data storage .
 - `models/` - Directory for saved models.
 
